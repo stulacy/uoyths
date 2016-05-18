@@ -24,8 +24,8 @@
 %^^A-               File Information                           -
 %^^A------------------------------------------------------------
 %<*driver|class>
-\def\datelastmodified/{2005/03/15}%
-\def\versionnumber/{v0.1}%
+\def\datelastmodified/{2016/05/18}%
+\def\versionnumber/{v0.2}%
 \def\filedescription/{Thesis Class to University of York Specifications}%
 %</driver|class>%
 %
@@ -69,7 +69,7 @@
 %   Right brace   \}     Tilde         \~}
 %
 %
-% \changes{v1.0}{2005/03/15}{Initial version}
+% \changes{v2.0}{2016/05/18}{Second version}
 %
 % \GetFileInfo{uoyths.dtx}
 %
@@ -79,7 +79,7 @@
 % \title{The \textsf{uoyths} class\thanks{This document
 %   corresponds to \textsf{uoyths}~\fileversion, dated \filedate.}\vspace{2mm}\\
 %   \small(\fileinfo)}
-% \author{Lee Netherton \\ \texttt{ltn100@ohm.york.ac.uk}}
+% \author{Stuart Lacy \\ \texttt{stuart.lacy@york.ac.uk}}
 %
 % \maketitle
 %
@@ -90,19 +90,44 @@
 %   \label{sec:intro}
 %
 %   This thesis class adheres to the University of York these regulations
-%   and, in addition, will provide the following functionality:
+%   as of May 2016. It has been updated from its original implementation
+%   by Lee Netherton (ltn100@ohm.york.ac.uk) to meet the latest
+%   set of regulations.
+%   In addition, it provides the following functionality:
 %
 %   \begin{itemize}
-%       \item Nomenclature support
 %       \item Acronym support
-%       \item Glossary support
 %       \item A |minitoc| at the start of each chapter
-%       \item A |bibunits| section at the end of each chapter
 %       \item Support for many bibliography styles with |natbib|
 %       \item Chapter and section \emph{environments}
-%       \item A full bibliography at the end in addition to the |bibunits|
-%       %\item Support for |hyperref|
+%       \item A full bibliography at the end 
+%       \item |hyperref| enabled by default
+%       \item Updated fonts from the original release
 %   \end{itemize}
+
+%   Several functionalities present in the original version
+%   have been removed, such as glossaries, chapter specific 
+%   bibliographies, and nonmenclature support. This results in a
+%   more streamlined thesis, with a simpler compilation stage.
+%
+%   NB: This class has been designed to compile in a Unix
+%   environment, and has not been tested on Windows, although
+%   this should work with a standard pdflatex call as indicated in
+%   the makefile.
+%
+%
+%   Changes made to meet the requirements for a thesis at the
+%   University of York include:
+% 
+%   \begin{itemize}
+%       \item Page number at the bottom of every page
+%       \item Grey header
+%       \item University and department name corrected
+%       \item Reordering of front matter
+%       \item Reordering of back matter
+%       \item Added Contents, List of Tables, and List of Figures to Contents
+%   \end{itemize}
+
 %
 %
 %^^A************************************************************
@@ -135,8 +160,6 @@
 \DeclareOption{10pt}{\PassOptionsToClass{\CurrentOption}{report}}%
 \DeclareOption{11pt}{\PassOptionsToClass{\CurrentOption}{report}}%
 \DeclareOption{12pt}{\PassOptionsToClass{\CurrentOption}{report}}%
-\DeclareOption{bibunits}{}%
-\DeclareOption{nobibunits}{}%
 \DeclareOption{minitocs}{}%
 \DeclareOption{nominitocs}{}%
 %\DeclareOption*{\PassOptionsToClass{\CurrentOption}{report}}%
@@ -152,7 +175,7 @@
 %^^A------------------------------------------------------------
 %       We can then load the class as the parent.
 %    \begin{macrocode}
-\LoadClass[11pt,a4paper,dvips]{report}%
+\LoadClass[11pt,a4paper,twoside,openright]{report}%
 %    \end{macrocode}
 %       We will require some packages to provide the functionality set
 %       out in chapter \ref{sec:intro}.
@@ -161,13 +184,24 @@
 \RequirePackage{natbib}%
 \RequirePackage[globalcitecopy,sectionbib]{bibunits}%
 \RequirePackage{acronym}% must be above glossary (for some reason!)
-\RequirePackage[style=long,number=none,toc=true]{glossary}% also requires package 'supertabular'
 \RequirePackage{chapterEnv}%
+\RequirePackage{emptypage}%
 \RequirePackage[notintoc]{nomencl}%
 \RequirePackage{setspace}%
 \RequirePackage{fancyhdr}% fancyhdr - fancy page headings
 \RequirePackage{epsfig}% Allow rendering of the logo from eps
 \RequirePackage{xkeyval}% Allows for key/value options for commands and environments
+\RequirePackage{hyperref}
+\RequirePackage{tabulary}
+\RequirePackage{booktabs} % great looking tables
+\RequirePackage{adjustbox}
+\RequirePackage{xcolor}
+\RequirePackage{datetime}
+\RequirePackage[T1]{fontenc}
+\RequirePackage{charter}
+\RequirePackage[expert]{mathdesign}
+\RequirePackage[final]{microtype}
+\RequirePackage{bm}  % Bold math
 %    \end{macrocode}
 %
 %^^A------------------------------------------------------------
@@ -296,9 +330,7 @@
 %           We shall also set up some indenting and some fonts.
 %    \begin{macrocode}
     \dominitoc%
-    \dominilof%
-    \dominilot%
-    \setcounter{minitocdepth}{3}%
+    \setcounter{minitocdepth}{2}%
     \setlength{\mtcindent}{\mtc@indent}%
     \renewcommand{\mtcfont}{\small\rm}%
     \renewcommand{\mtcSfont}{\small\bf}%
@@ -315,21 +347,6 @@
 %           information.
 %    \begin{macrocode}
     \renewcommand{\nompreamble}{\mtcaddchapter[\nomname]\@mkboth{\MakeUppercase\nomname}{\MakeUppercase\nomname}}%
-    \makenomenclature%
-%    \end{macrocode}
-%
-%^^A------------------------------------------------------------
-%^^A-             Set-up glossary                           -
-%^^A------------------------------------------------------------
-%       \subsubsection{Configure \texttt{glossary}}
-%           \label{subsubsec:glossary}
-%
-%    \begin{macrocode}
-    \renewcommand{\glossaryname}{Glossary of Terms}%  Change title of glossary
-    \setlength{\descriptionwidth}{110mm}%
-    \let\old@afterglossary\afterglossary%
-    \renewcommand{\afterglossary}{\adjustmtc\relax\addcontentsline{lof}{xchapter}{}\relax\addcontentsline{lot}{xchapter}{}\relax\old@afterglossary}
-    \makeglossary%
 %    \end{macrocode}
 %
 %^^A------------------------------------------------------------
@@ -341,51 +358,16 @@
 %           single-spaced |minitoc|.
 %    \begin{macrocode}
     \newif\if@chapmtc\@chapmtctrue%
-    \newif\if@chapmlf\@chapmlffalse%
-    \newif\if@chapmlt\@chapmltfalse%
-    \newif\if@chapbu\@chapbutrue%
     \newcommand{\showmtc}{\@chapmtctrue}%
     \newcommand{\hidemtc}{\@chapmtcfalse}%
-    \newcommand{\showmlf}{\@chapmlftrue}%
-    \newcommand{\hidemlf}{\@chapmlffalse}%
-    \newcommand{\showmlt}{\@chapmlttrue}%
-    \newcommand{\hidemlt}{\@chapmltfalse}%
-    \newcommand{\showbu}{\@chapbutrue}%
-    \newcommand{\hidebu}{\@chapbufalse}%
     \addToStartOfChapter%
     {%
         \acresetall%
         \begin{singlespace}%
             \if@chapmtc%
                 \minitoc%
-                \if@chapmlf%
-                    \mtcskip%
-                \fi%
-            \fi%
-            \if@chapmlf%
-                \minilof%
-                \if@chapmlt%
-                    \mtcskip%
-                \fi%
-            \fi%
-            \if@chapmlt%
-                \minilot%
             \fi%
         \end{singlespace}%
-        \begin{bibunit}
-    }%
-    %    \end{macrocode}
-    %           At the end of each chapter we will include a |bibunit|.
-    %    \begin{macrocode}
-    \addToEndOfChapter%
-    {%
-            \begin{singlespace}%
-                \if@chapbu%
-                    \putbib%
-                \fi%
-            \end{singlespace}%
-
-        \end{bibunit}
     }%
 %    \end{macrocode}
 %       The end of |\SetupPackages|:
@@ -401,8 +383,8 @@
 %    \begin{macrocode}
 \renewenvironment{abstract}%
 {%
+    \cleardoublepage
     \hidemtc% Remove MiniTOC
-    \hidebu% Remove MiniTOC
     \begin{chapterEnv}{Abstract}
 }%
 %    \end{macrocode}
@@ -410,7 +392,6 @@
 {%
     \end{chapterEnv}
     \showmtc%
-    \showbu%
 }%
 %    \end{macrocode}
 % \end{environment}
@@ -450,14 +431,23 @@
     \pagestyle{fancy}
 
 % header
-    \lhead{\bfseries\small\nouppercase{\rightmark}}%
-    \rhead{\bfseries\small\nouppercase{\thepage}}%
-    \renewcommand{\headrulewidth}{2pt}%
+    \lhead{\textcolor{gray}{\small\nouppercase{\rightmark}}}%
+    \rhead{\textcolor{gray}{\small\nouppercase{\thepage}}}%
+    \def\headrule{{\color{gray}\if@fancyplain\let\headrulewidth\plainheadrulewidth\fi
+    \hrule\@height\headrulewidth\@width\headwidth
+    \vskip-\headrulewidth}}
+    \renewcommand{\headrulewidth}{0.5pt}
+
+    % I prefer the following header settings for my own personal copy
+    %\lhead{\bfseries\small\nouppercase{\rightmark}}%
+    %\rhead{\bfseries\small\nouppercase{\thepage}}%
+    %\renewcommand{\headrulewidth}{1pt}%
+
 
 % footer
 
     %\lfoot{}
-    \cfoot{}
+    \cfoot{\thepage}
     \rfoot{}
     %\renewcommand{\footrulewidth}{0.4pt}
 
@@ -553,8 +543,8 @@
                 \par
                 \begin{center}
                     {\othertitlefont
-                    \textsc{The University of York}\\
-                    \textsc{Department of Electronics}}
+                    \textsc{University of York}\\
+                    \textsc{Electronics}}
                 \end{center}
                 \par
                 \vspace*{2cm}
@@ -568,7 +558,7 @@
 
         \iftp@title
             % Title page with university description
-            \newpage \thispagestyle{empty}
+            \cleardoublepage \thispagestyle{empty}
             \vspace*{1.5cm}
             \begin{flushright}
                 \largetitlefont \@title
@@ -593,7 +583,7 @@
                     \epsfig{file=uoyths_logo.eps,width=.63\linewidth}
                 \else
                     \textsc{Intelligent Systems Research Group}\\[1mm]
-                    {\othertitlefont Department of Electronics}\\[1mm]
+                    {\othertitlefont Electronics}\\[1mm]
                     {\othertitlefont University of York}\\[5mm]
                 \fi
             \end{flushright}
@@ -620,22 +610,13 @@
 %       \label{subsec:addfunc}
 %
 %    \begin{macrocode}
-% Acronym Glossary Entry
-\newcommand{\glossac}[2]{%
-\ifthenelse{\equal{#2}{}}%
-    {\glossary{sort={#1},name={\string\acs{#1}},description={\string\acl{#1}.}}}%
-    {\glossary{sort={#1},name={\string\acs{#1}},description={\string\acl{#1}---#2}}}%
-}
-%    \end{macrocode}
-%    \begin{macrocode}
 \newcommand{\printbibliography}{%
     \let\thebibliographytemp\thebibliography%
     \bibliographyunit%
     \let\thebibliography\stdthebibliography%
     \bibliographystyle{\cite@style}%
-    \newcommand{\bibpreamble}{\mtcaddchapter[\bibname]}%
+    \renewcommand{\bibpreamble}{\mtcaddchapter[\bibname]}%
     \bibliography{\bib@file}%
-    \renewcommand{\bibpreamble}{}%
     \let\thebibliography\thebibliographytemp%
 }
 \newcommand{\stopstar}
@@ -684,44 +665,6 @@
 %^^A%                END OF PACKAGE
 %^^A%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%^^A---------------------------------------------------------------------
-%^^A-                comp_bibunits batch file
-%^^A---------------------------------------------------------------------
-%<*comp>
-%<<COMMENT
-@echo off
-echo Compile bibunits.....
-echo ...
-echo ...
-for %%f in (bu*.aux) do call comp_bibunit %%~nf
-if exist comp_bibunits.tmp del comp_bibunits.tmp
-echo ...
-echo Making glossary.....
-echo ...
-echo ...
-for %%f in (*.ist) do makeindex -s %%~nf.ist -t %%~nf.glg -o %%~nf.gls %%~nf.glo
-echo ...
-echo Making nomenclature.....
-echo ...
-for %%f in (*.ist) do makeindex -s nomencl.ist -t %%~nf.nlg -o %%~nf.nls %%~nf.nlo
-echo ...
-if %errorlevel%==0 echo ...Done!
-pause
-%COMMENT
-%</comp>
-%
-%^^A---------------------------------------------------------------------
-%^^A-                comp_bibunit batch file
-%^^A---------------------------------------------------------------------
-%<*compbibunit>
-%<<COMMENT
-@echo off
-if %1==bu goto end
-find "\citation" < %1.aux > comp_bibunits.tmp
-if %errorlevel%==0 bibtex %1 echo & echo.
-:end
-%COMMENT
-%</compbibunit>
 %
 %^^A---------------------------------------------------------------------
 %^^A-                example thesis file
@@ -731,11 +674,20 @@ if %errorlevel%==0 bibtex %1 echo & echo.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% File:     example.tex
 %% Purpose:  Example Thesis File!
-%% Usage:    Compile with LaTeX, run COMPILE.bat, and then
-%%           compile with LaTeX again.
+%% Usage:    Compile with 'make', and bibliography with 'bibtex example'
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \documentclass{uoyths}
+
+% I'm not good enough with LaTeX to put these commands in the class file directly!
+\hypersetup{%
+  pdfborder = {0 0 0}
+}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newdimen\heavyrulewidth
+\newdimen\lightrulewidth
+\heavyrulewidth = 0.08em
+\lightrulewidth = 0.05em
 
 % Set the bibliography file
 \SetBibliographyFile{example}%
@@ -745,10 +697,11 @@ if %errorlevel%==0 bibtex %1 echo & echo.
     \input{lorem.tex}
 
     % Title Page
-    \begin{titlepage}[cover=true, title=true, logo=true] % (default, so pointless other than to show syntax)
+    % The nice title page produced by title=true isn't allowed in the final thesis, although I included it in my personal copy
+    \begin{titlepage}[cover=true, title=false, logo=true] 
         \title{Lorem Ipsum Dolor Sit Amet, Consectetuer Adipiscing Elit.}
         \author{Cicero}
-        \date{\today}
+        \date{\todaysdate}
     \end{titlepage}
 
     % Front Matter
@@ -760,13 +713,22 @@ if %errorlevel%==0 bibtex %1 echo & echo.
         \end{abstract}
 
         % Table of Contents
+        \cleardoublepage
+        \phantomsection
+        \addstarredchapter{Contents}
         {\singlespacing\tableofcontents}%
 
-        % Preface
-        \begin{chapterEnv}{Preface}
-            \loremC{}
-            \loremB{}
-        \end{chapterEnv}
+        % List of figures & tables
+        \cleardoublepage
+        \phantomsection
+        \addstarredchapter{\listfigurename}
+        \listoffigures
+
+        \cleardoublepage
+        \phantomsection
+        \addstarredchapter{\listtablename}
+        \listoftables
+
 
         % Acknowledgments
         \begin{chapterEnv}{Acknowledgments}
@@ -774,8 +736,14 @@ if %errorlevel%==0 bibtex %1 echo & echo.
         \end{chapterEnv}
 
         % Declaration
-        \begin{chapterEnv}{Acknowledgments}
+        \begin{chapterEnv}{Declaration}
             \loremA{}
+        \end{chapterEnv}
+
+        % Preface
+        \begin{chapterEnv}{Preface}
+            \loremC{}
+            \loremB{}
         \end{chapterEnv}
 
     \end{frontMatterEnv}
@@ -787,6 +755,8 @@ if %errorlevel%==0 bibtex %1 echo & echo.
         \begin{chapterEnv}[chap:intro]{Introduction}
             % Introductory Section
             \begin{sectionEnv}[sec:intro-intro]{Introduction}
+                Some text demonstrating acronyms, such as \ac{FOO}, when used a second time it only displays the acronym \ac{FOO}, or other versions of it such as \acl{FOO}, \acp{FOO}, \aclp{FOO}, \acs{FOO}. Same with \ac{BAR}, \ac{STUFF} etc\ldots
+                \\
                 \loremC{}
             \end{sectionEnv}
             % Another Section
@@ -913,18 +883,12 @@ if %errorlevel%==0 bibtex %1 echo & echo.
     % Back Matter
     \begin{backMatterEnv}
 
-        % Nomenclature
-        \printnomenclature%
 
-        % Glossary
-        \printglossary%
+        % Appendices
+        \cleardoublepage
+        \phantomsection
+        \addstarredpart{Appendices}
 
-        % Bibliography
-        %Included for Gather Purpose only (WinEdt):
-        %input "example.bib"
-        \printbibliography%
-
-        % Appendix
         \begin{chapterEnv}[appen:systems]{Systems}
             \begin{sectionEnv}[asec:systems-intro]{Introduction}
                 \loremB{}
@@ -954,7 +918,30 @@ if %errorlevel%==0 bibtex %1 echo & echo.
             \end{sectionEnv}
         \end{chapterEnv}
 
+        % Acronyms
+        \hidemtc% Remove MiniTOC
+        \begin{chapterEnv*}{Glossary}
+            \addcontentsline{toc}{chapter}{Glossary}
 
+            \section*{Some group}
+            \begin{acronym}
+                \acro{FOO}{Follicular Optional Optometrics}
+                \acro{BAR}{Bargaining And Reasoning}
+            \end{acronym}
+
+            \section*{Some other group}
+            \begin{acronym}
+                \acro{STUFF}{Symmetrical Telescopic Unbiased Forward Feedback}
+            \end{acronym}
+        \end{chapterEnv*}
+
+        \showmtc% Remove MiniTOC
+
+
+        % Bibliography
+        %Included for Gather Purpose only (WinEdt):
+        %input "example.bib"
+        \printbibliography%
 
     \end{backMatterEnv}
 
